@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function
 import datetime
 import json
 from copy import deepcopy
+from decimal import Decimal
 
 import stripe
 from stripe import api_requestor, util, six
@@ -39,6 +40,8 @@ class StripeObject(dict):
             if isinstance(obj, datetime.datetime):
                 return api_requestor._encode_datetime(obj)
             return super(StripeObject.ReprJSONEncoder, self).default(obj)
+
+    DECIMAL_STRING_FIELDS = frozenset([])
 
     def __init__(
         self,
@@ -116,7 +119,12 @@ class StripeObject(dict):
 
     def __getitem__(self, k):
         try:
-            return super(StripeObject, self).__getitem__(k)
+            value = super(StripeObject, self).__getitem__(k)
+            if k in self.DECIMAL_STRING_FIELDS and isinstance(
+                value, six.string_types
+            ):
+                return Decimal(value)
+            return value
         except KeyError as err:
             if k in self._transient_values:
                 raise KeyError(

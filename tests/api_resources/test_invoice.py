@@ -1,5 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
+from decimal import Decimal
+
 import stripe
 
 
@@ -136,3 +138,11 @@ class TestInvoice(object):
             "post", "/v1/invoices/%s/void" % TEST_RESOURCE_ID
         )
         assert isinstance(resource, stripe.Invoice)
+
+    def test_decimal_string_fields(self, request_mock):
+        resource = stripe.Invoice.construct_from(
+            {"unit_amount": 0, "unit_amount_precise": "0.123456789012"},
+            key="mykey",
+        )
+        assert resource.unit_amount_precise == Decimal("0.123456789012")
+        assert resource["unit_amount_precise"] == Decimal("0.123456789012")

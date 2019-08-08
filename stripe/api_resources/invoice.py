@@ -22,6 +22,8 @@ class Invoice(
 ):
     OBJECT_NAME = "invoice"
 
+    DECIMAL_STRING_FIELDS = frozenset(["unit_amount", "unit_amount_precise"])
+
     def finalize_invoice(self, idempotency_key=None, **params):
         url = self.instance_url() + "/finalize"
         headers = util.populate_headers(idempotency_key)
